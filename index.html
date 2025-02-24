@@ -7,17 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0A0A0A] min-h-screen text-[#C1C1C1]">
-    <div class="max-w-5xl mx-auto px-6 py-12">
+    <div class="max-w-3xl mx-auto px-4 py-16">
         <!-- Search Bar -->
         <div class="relative mb-8">
             <input type="text" 
                    id="searchInput" 
-                   class="w-full px-6 py-4 pl-12 text-base bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#808080] focus:border-transparent text-[#C1C1C1]"
-                   placeholder="Search for VSCode extensions...">
-            <svg class="absolute left-4 top-5 h-5 w-5 text-[#808080]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="w-full px-8 py-5 pl-14 text-lg bg-[#1A1A1A] border-2 border-[#2A2A2A] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#808080] focus:border-transparent text-[#E1E1E1] shadow-lg"
+                   placeholder="Search or Paste URL for VSCode extensions...">
+            <svg class="absolute left-5 top-6 h-6 w-6 text-[#808080]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-            <kbd class="absolute right-4 top-4 px-2.5 py-1 text-sm text-[#808080] bg-[#1A1A1A] border border-[#2A2A2A] rounded">K</kbd>
+            <kbd class="absolute right-5 top-5 px-3 py-1.5 text-sm text-[#808080] bg-[#1A1A1A] border border-[#2A2A2A] rounded">/</kbd>
         </div>
 
         <!-- Categories -->
@@ -45,11 +45,25 @@
 
         // Add keyboard shortcut handler
         document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'k' && 
+            if (e.key.toLowerCase() === '/' && 
                 document.activeElement.tagName !== 'INPUT' && 
                 document.activeElement.tagName !== 'TEXTAREA') {
                 e.preventDefault();
                 document.getElementById('searchInput').focus();
+            }
+        });
+
+        // Add keyboard shortcut handler
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === '/' && 
+                document.activeElement.tagName !== 'INPUT' && 
+                document.activeElement.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            // Add Esc handler
+            else if (e.key === 'Escape' && document.activeElement === document.getElementById('searchInput')) {
+                document.activeElement.blur();
             }
         });
 
