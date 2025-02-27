@@ -235,6 +235,60 @@
     <div
       class="search-container absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] max-w-[90vw] z-10"
     >
+      <!-- Firefox Warning Message -->
+      <div id="firefox-warning" class="mb-4 hidden">
+        <div
+          class="macos-blur rounded-lg bg-amber-600/70 p-4 text-white shadow-md border border-amber-500/30"
+        >
+          <div class="flex items-start">
+            <svg
+              class="h-6 w-6 mr-2 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div>
+              <p class="font-medium">Firefox detected!</p>
+              <p class="text-sm mt-1">
+                You may experience CORS issues. Please install
+                <a
+                  href="https://addons.mozilla.org/en-US/firefox/addon/cors-unblock/"
+                  target="_blank"
+                  class="underline font-semibold hover:text-amber-200"
+                  >CORS Unblock</a
+                >
+                extension to ensure proper functionality.
+              </p>
+            </div>
+            <button
+              onclick="document.getElementById('firefox-warning').classList.add('hidden')"
+              class="ml-auto flex-shrink-0 text-amber-100 hover:text-white"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Search box -->
       <div
         class="macos-blur rounded-2xl bg-macos-bg text-macos-text shadow-xl border border-white/10 overflow-hidden"
@@ -1053,6 +1107,13 @@
           // Prevent "/" from being typed in the search box
           e.preventDefault();
           searchInput.focus();
+        }
+      });
+
+      // Check if user is using Firefox and show warning if needed
+      window.addEventListener("load", function () {
+        if (navigator.userAgent.toLowerCase().indexOf("firefox") > -1 || navigator.userAgent.toLowerCase().indexOf("gecko") > -1) {
+          document.getElementById("firefox-warning").classList.remove("hidden");
         }
       });
     </script>
