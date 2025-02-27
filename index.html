@@ -180,6 +180,10 @@
               <span class="mr-1">clear</span>
               <div class="keyboard-hint">Esc</div>
             </div>
+            <div class="flex items-center">
+              <span class="mr-1">focus</span>
+              <div class="keyboard-hint">/</div>
+            </div>
           </div>
         </div>
 
@@ -543,7 +547,7 @@
                   Download Assets
               </div>
               <div class="assets-container max-h-48 overflow-y-auto py-1">
-                  <div class="px-3 py-4 text-center">
+                  <div class="px-3 py-2 text-xs text-macos-secondary">
                       <svg class="spinner w-5 h-5 text-macos-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
                           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -725,7 +729,7 @@
         const addSectionHeader = (title) => {
           const header = document.createElement("div");
           header.className =
-            "px-3 py-1 text-xs text-macos-secondary font-medium bg-black/20 mt-1";
+            "px-3 py-1 border-b border-white/10 text-sm font-medium text-macos-text";
           header.textContent = title;
           container.appendChild(header);
         };
@@ -946,6 +950,11 @@
             // Start search
             searchExtensions(query, 1, false);
           }
+        } else if (e.key === "/" && document.activeElement !== searchInput) {
+          // Focus on search input when "/" is pressed anywhere on the page
+          // Prevent "/" from being typed in the search box
+          e.preventDefault();
+          searchInput.focus();
         }
       });
     </script>
