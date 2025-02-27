@@ -462,24 +462,11 @@
                         <div class="text-xs text-macos-secondary line-clamp-1">${description}</div>
                     </div>
                     <div class="flex-shrink-0 ml-2">
-                        <button class="download-btn text-macos-accent hover:bg-white/10 rounded-full p-2 hidden group-hover:block transition duration-150">
+                        <button class="download-btn text-macos-accent hover:bg-white/10 rounded-full p-2 hidden group-hover:block transition duration-150" data-extension-id="${publisherName}.${extensionName}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                         </button>
-                        <div class="download-dropdown absolute right-4 top-full mt-2 bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 hidden z-20 w-80 overflow-y-auto max-h-96">
-                            <div class="py-2 px-3 border-b border-white/10 text-sm font-medium text-macos-text">
-                                Download Assets
-                            </div>
-                            <div class="assets-container max-h-48 overflow-y-auto py-1">
-                                <div class="px-3 py-4 text-center">
-                                    <svg class="spinner w-5 h-5 text-macos-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 `;
 
@@ -488,8 +475,7 @@
           // Add click event for the main item
           resultEl.addEventListener("click", (e) => {
             if (
-              !e.target.closest(".download-btn") &&
-              !e.target.closest(".download-dropdown")
+              !e.target.closest(".download-btn")
             ) {
               const extensionId = `${publisherName}.${extensionName}`;
               window.open(
@@ -501,33 +487,75 @@
 
           // Add click event for download button
           const downloadBtn = resultEl.querySelector(".download-btn");
-          const downloadDropdown = resultEl.querySelector(".download-dropdown");
-          const assetsContainer = resultEl.querySelector(".assets-container");
-
+          
           downloadBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-
+            
+            // Get extension ID from data attribute
+            const extensionId = downloadBtn.getAttribute("data-extension-id");
+            
             // Close any other open dropdowns
-            document
-              .querySelectorAll(".download-dropdown:not(.hidden)")
-              .forEach((dropdown) => {
-                if (dropdown !== downloadDropdown) {
-                  dropdown.classList.add("hidden");
-                }
-              });
-
-            // Toggle current dropdown
-            downloadDropdown.classList.toggle("hidden");
-
-            // If opening the dropdown, load the assets
-            if (!downloadDropdown.classList.contains("hidden")) {
-              loadExtensionAssets(extension, assetsContainer);
+            const existingDropdown = document.getElementById("global-dropdown");
+            if (existingDropdown) {
+              document.body.removeChild(existingDropdown);
             }
-          });
-
-          // Prevent dropdown clicks from bubbling up
-          downloadDropdown.addEventListener("click", (e) => {
-            e.stopPropagation();
+            
+            // Create dropdown element
+            const downloadDropdown = document.createElement("div");
+            downloadDropdown.id = "global-dropdown";
+            downloadDropdown.className = "fixed bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 z-50 w-80 overflow-y-auto max-h-96";
+            downloadDropdown.innerHTML = `
+              <div class="py-2 px-3 border-b border-white/10 text-sm font-medium text-macos-text">
+                  Download Assets
+              </div>
+              <div class="assets-container max-h-48 overflow-y-auto py-1">
+                  <div class="px-3 py-4 text-center">
+                      <svg class="spinner w-5 h-5 text-macos-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                  </div>
+              </div>
+            `;
+            
+            // Position the dropdown relative to the button
+            const buttonRect = downloadBtn.getBoundingClientRect();
+            
+            // Calculate position to align dropdown with the button
+            // We'll align it so it appears right under the button but not extending too far right
+            const buttonCenterX = buttonRect.left + (buttonRect.width / 2);
+            
+            // Set dropdown width 
+            const dropdownWidth = 320; // Width from the class w-80
+            
+            // Calculate left position to center dropdown with button if possible,
+            // but ensure it stays within viewport bounds
+            let leftPos = buttonCenterX - (dropdownWidth / 2);
+            
+            // Ensure dropdown doesn't go off-screen to the left
+            leftPos = Math.max(10, leftPos);
+            
+            // Ensure dropdown doesn't go off-screen to the right
+            const rightEdge = leftPos + dropdownWidth;
+            if (rightEdge > window.innerWidth - 10) {
+              leftPos = window.innerWidth - dropdownWidth - 10;
+            }
+            
+            // Position the dropdown
+            downloadDropdown.style.top = (buttonRect.bottom + 8) + 'px';
+            downloadDropdown.style.left = leftPos + 'px';
+            
+            // Add to body
+            document.body.appendChild(downloadDropdown);
+            
+            // Load assets for this extension
+            const assetsContainer = downloadDropdown.querySelector(".assets-container");
+            loadExtensionAssets(extension, assetsContainer);
+            
+            // Prevent dropdown clicks from bubbling up
+            downloadDropdown.addEventListener("click", (e) => {
+              e.stopPropagation();
+            });
           });
 
           // Add sentinel to last item if we have more results
@@ -842,27 +870,24 @@
       }
 
       // Add global click handler to close all dropdowns when clicking outside
-      document.addEventListener("click", () => {
-        document.querySelectorAll(".download-dropdown").forEach((dropdown) => {
-          dropdown.classList.add("hidden");
-        });
+      document.addEventListener("click", (e) => {
+        const globalDropdown = document.getElementById("global-dropdown");
+        if (globalDropdown && !e.target.closest("#global-dropdown") && !e.target.closest(".download-btn")) {
+          document.body.removeChild(globalDropdown);
+        }
       });
 
       // Improve existing keyboard navigation
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-          // Close all dropdowns first
-          const openDropdowns = document.querySelectorAll(
-            ".download-dropdown:not(.hidden)"
-          );
-          if (openDropdowns.length > 0) {
-            openDropdowns.forEach((dropdown) =>
-              dropdown.classList.add("hidden")
-            );
+          // Close dropdown first if it's open
+          const globalDropdown = document.getElementById("global-dropdown");
+          if (globalDropdown) {
+            document.body.removeChild(globalDropdown);
             return;
           }
 
-          // If no dropdowns are open, reset search
+          // If no dropdown is open, reset search
           searchInput.value = "";
           resultsContainer.classList.add("hidden");
           loadingIndicator.classList.add("hidden");
