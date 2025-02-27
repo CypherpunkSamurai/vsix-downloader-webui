@@ -81,6 +81,43 @@
             backdropBlur: {
               macos: "20px",
             },
+            animation: {
+              'spin-slow': 'spin 1.5s linear infinite',
+              'bounce-slow': 'bounce 2s infinite',
+              'pulse-gentle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in': 'fadeIn 0.3s ease-out forwards',
+              'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
+              'fade-out': 'fadeOut 0.2s ease-out forwards',
+              'scale-in': 'scaleIn 0.2s ease-out forwards',
+              'slide-in-right': 'slideInRight 0.3s ease-out forwards',
+              'slide-in-down': 'slideInDown 0.3s ease-out forwards',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              fadeOut: {
+                '0%': { opacity: '1' },
+                '100%': { opacity: '0' },
+              },
+              scaleIn: {
+                '0%': { transform: 'scale(0.95)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+              slideInRight: {
+                '0%': { transform: 'translateX(-10px)', opacity: '0' },
+                '100%': { transform: 'translateX(0)', opacity: '1' },
+              },
+              slideInDown: {
+                '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)' },
+              },
+            }
           },
         },
       };
@@ -236,7 +273,7 @@
       class="search-container absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] max-w-[90vw] z-10"
     >
       <!-- Firefox Warning Message -->
-      <div id="firefox-warning" class="mb-4 hidden">
+      <div id="firefox-warning" class="mb-4 hidden animate-slide-in-down">
         <div
           class="macos-blur rounded-lg bg-amber-600/70 p-4 text-white shadow-md border border-amber-500/30"
         >
@@ -346,7 +383,7 @@
           class="py-8 flex justify-center items-center hidden"
         >
           <svg
-            class="spinner w-8 h-8 text-macos-accent"
+            class="animate-spin-slow w-8 h-8 text-macos-accent"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -373,7 +410,7 @@
           class="py-4 flex justify-center items-center hidden"
         >
           <svg
-            class="spinner w-6 h-6 text-macos-accent"
+            class="animate-spin-slow w-6 h-6 text-macos-accent"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -397,11 +434,11 @@
         <!-- Empty state -->
         <div
           id="empty-state"
-          class="py-10 text-center text-macos-secondary hidden"
+          class="py-10 text-center text-macos-secondary hidden animate-fade-in"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-12 w-12 mx-auto mb-3 text-macos-secondary/50"
+            class="h-12 w-12 mx-auto mb-3 text-macos-secondary/50 animate-pulse-gentle"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -417,10 +454,10 @@
         </div>
 
         <!-- Initial state -->
-        <div id="initial-state" class="py-12 text-center text-macos-secondary">
+        <div id="initial-state" class="py-12 text-center text-macos-secondary animate-fade-in">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-14 w-14 mx-auto mb-4 text-macos-secondary/40"
+            class="h-14 w-14 mx-auto mb-4 text-macos-secondary/40 animate-pulse-gentle"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -631,27 +668,31 @@
 
           const resultEl = document.createElement("div");
           resultEl.className =
-            "px-4 py-3 hover:bg-macos-result-hover cursor-pointer flex items-start relative group transition duration-150";
+            "px-4 py-3 hover:bg-macos-result-hover cursor-pointer flex items-start relative group transition duration-150 animate-fade-in-up";
+          
+          // Add staggered animation delay
+          resultEl.style.animationDelay = `${index * 0.05}s`;
+          
           resultEl.innerHTML = `
-                    <div class="flex-shrink-0 mr-4">
-                        <img src="${iconUrl}" 
-                             class="w-10 h-10 rounded-md shadow-sm border border-white/10" 
-                             alt="${name} icon"
-                             onerror="this.onerror=null; this.src='https://cdn.vsassets.io/v/M213_20230726.1/_content/Header/default_icon.png';">
-                    </div>
-                    <div class="flex-grow overflow-hidden">
-                        <div class="font-medium text-macos-text truncate">${name}</div>
-                        <div class="text-sm text-macos-secondary truncate">${publisher} • ${formattedInstalls} installs</div>
-                        <div class="text-xs text-macos-secondary line-clamp-1">${description}</div>
-                    </div>
-                    <div class="flex-shrink-0 ml-2">
-                        <button class="download-btn text-macos-accent hover:bg-white/10 rounded-full p-2 hidden group-hover:block transition duration-150" data-extension-id="${publisherName}.${extensionName}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                        </button>
-                    </div>
-                `;
+                      <div class="flex-shrink-0 mr-4">
+                          <img src="${iconUrl}" 
+                               class="w-10 h-10 rounded-md shadow-sm border border-white/10 bg-macos-result" 
+                               alt="${name} icon"
+                               onerror="this.onerror=null; this.src='https://cdn.vsassets.io/v/M213_20230726.1/_content/Header/default_icon.png';">
+                      </div>
+                      <div class="flex-grow overflow-hidden">
+                          <div class="font-medium text-macos-text truncate">${name}</div>
+                          <div class="text-sm text-macos-secondary truncate">${publisher} • ${formattedInstalls} installs</div>
+                          <div class="text-xs text-macos-secondary line-clamp-1">${description}</div>
+                      </div>
+                      <div class="flex-shrink-0 ml-2">
+                          <button class="download-btn text-macos-accent hover:bg-white/10 rounded-full p-2 hidden group-hover:block transition duration-150" data-extension-id="${publisherName}.${extensionName}">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                              </svg>
+                          </button>
+                      </div>
+                  `;
 
           resultsContainer.appendChild(resultEl);
 
@@ -685,7 +726,7 @@
             const downloadDropdown = document.createElement("div");
             downloadDropdown.id = "global-dropdown";
             downloadDropdown.className =
-              "fixed bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 z-50 w-80 overflow-y-auto max-h-96";
+              "fixed bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 z-50 w-80 overflow-y-auto max-h-96 animate-scale-in";
             downloadDropdown.innerHTML = `
               <div class="py-2 px-3 border-b border-white/10 text-sm font-medium text-macos-text">
                   Download Assets
@@ -1112,7 +1153,7 @@
 
       // Check if user is using Firefox and show warning if needed
       window.addEventListener("load", function () {
-        if (navigator.userAgent.toLowerCase().indexOf("firefox") > -1 || navigator.userAgent.toLowerCase().indexOf("gecko") > -1) {
+        if (navigator.userAgent.toLowerCase().indexOf("firefox") > -1) {
           document.getElementById("firefox-warning").classList.remove("hidden");
         }
       });
