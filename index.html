@@ -1,300 +1,858 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSCode Extension Search</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>macOS Style Launcher</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-[#0A0A0A] min-h-screen text-[#C1C1C1]">
-    <div class="max-w-3xl mx-auto px-4 py-16">
-        <!-- Search Bar -->
-        <div class="relative mb-8">
-            <input type="text" 
-                   id="searchInput" 
-                   class="w-full px-8 py-5 pl-14 text-lg bg-[#1A1A1A] border-2 border-[#2A2A2A] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#808080] focus:border-transparent text-[#E1E1E1] shadow-lg"
-                   placeholder="Search or Paste URL for VSCode extensions...">
-            <svg class="absolute left-5 top-6 h-6 w-6 text-[#808080]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <kbd class="absolute right-5 top-5 px-3 py-1.5 text-sm text-[#808080] bg-[#1A1A1A] border border-[#2A2A2A] rounded">/</kbd>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "macos-bg": "rgba(28, 28, 30, 0.75)",
+              "macos-result": "rgba(44, 44, 46, 0.8)",
+              "macos-result-hover": "rgba(58, 58, 60, 0.9)",
+              "macos-accent": "#0A84FF",
+              "macos-text": "#F2F2F7",
+              "macos-secondary": "#8E8E93",
+            },
+            backdropBlur: {
+              macos: "20px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+    </style>
+    <style>
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      .macos-blur {
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+      }
+
+      .search-container {
+        transform: translate(-50%, -50%);
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -60%);
+        }
+
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%);
+        }
+      }
+
+      .loading-dots span {
+        animation: dotPulse 1.5s infinite ease-in-out;
+      }
+
+      .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes dotPulse {
+        0%,
+        100% {
+          opacity: 0.2;
+        }
+
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spinner {
+        animation: spin 1s linear infinite;
+      }
+    </style>
+  </head>
+
+  <body class="h-screen flex items-center justify-center bg-black">
+    <!-- Replace existing background with a darker one -->
+    <div class="fixed inset-0 z-0">
+      <img
+        src="https://wallpapercave.com/download/visual-studio-wallpapers-wp6734435"
+        class="h-full w-full object-cover"
+        alt="macOS background"
+      />
+    </div>
+    <div
+      class="search-container absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] max-w-[90vw] z-10"
+    >
+      <!-- Search box -->
+      <div
+        class="macos-blur rounded-2xl bg-macos-bg text-macos-text shadow-xl border border-white/10 overflow-hidden"
+      >
+        <!-- Search input -->
+        <div class="flex items-center p-5 border-b border-white/10">
+          <svg
+            class="w-5 h-5 text-gray-400 mr-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+          <input
+            type="text"
+            id="search-input"
+            class="w-full bg-transparent outline-none text-macos-text placeholder-gray-500 text-lg"
+            placeholder="Search VS Code Extensions..."
+            autocomplete="off"
+            autofocus
+          />
         </div>
 
-        <!-- Categories -->
-        <div class="mb-8">
-            <h2 class="text-base font-medium text-[#A1A1A1] mb-4">Suggestions</h2>
+        <!-- Results container -->
+        <div
+          id="results-container"
+          class="max-h-[60vh] overflow-y-auto py-2 hidden"
+        >
+          <!-- Results will be inserted here by JS -->
         </div>
 
-        <!-- Results -->
-        <div id="results" class="space-y-4"></div>
-
-        <!-- Loading Indicator -->
-        <div id="loading" class="hidden">
-            <div class="flex justify-center py-6">
-                <div class="animate-spin rounded-full h-8 w-8 border-2 border-[#808080] border-t-transparent"></div>
-            </div>
+        <!-- Loading indicator -->
+        <div
+          id="loading-indicator"
+          class="py-8 flex justify-center items-center hidden"
+        >
+          <svg
+            class="spinner w-8 h-8 text-macos-accent"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="3"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
         </div>
+
+        <!-- Infinite scroll loading indicator -->
+        <div
+          id="infinite-scroll-loader"
+          class="py-4 flex justify-center items-center hidden"
+        >
+          <svg
+            class="spinner w-6 h-6 text-macos-accent"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="3"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </div>
+
+        <!-- Empty state -->
+        <div
+          id="empty-state"
+          class="py-10 text-center text-macos-secondary hidden"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-12 w-12 mx-auto mb-3 text-macos-secondary/50"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <p>No extensions found. Try a different search term.</p>
+        </div>
+
+        <!-- Initial state -->
+        <div id="initial-state" class="py-12 text-center text-macos-secondary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-14 w-14 mx-auto mb-4 text-macos-secondary/40"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <p>Start typing to search VS Code extensions</p>
+        </div>
+      </div>
     </div>
 
     <script>
-        let currentPage = 1;
-        let currentQuery = '';
-        let isLoading = false;
-        let hasMoreResults = true;
-        let searchTimeout = null;
+      const searchInput = document.getElementById("search-input");
+      const resultsContainer = document.getElementById("results-container");
+      const loadingIndicator = document.getElementById("loading-indicator");
+      const emptyState = document.getElementById("empty-state");
+      const initialState = document.getElementById("initial-state");
+      const infiniteScrollLoader = document.getElementById(
+        "infinite-scroll-loader"
+      );
 
-        // Add keyboard shortcut handler
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === '/' && 
-                document.activeElement.tagName !== 'INPUT' && 
-                document.activeElement.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-                document.getElementById('searchInput').focus();
-            }
+      let debounceTimer;
+      let currentQuery = "";
+      let currentPage = 1;
+      let isLoading = false;
+      let hasMoreResults = true;
+
+      // Create intersection observer for infinite scrolling
+      const observerOptions = {
+        root: resultsContainer,
+        threshold: 0.5,
+      };
+
+      const intersectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (
+            entry.isIntersecting &&
+            hasMoreResults &&
+            !isLoading &&
+            currentQuery
+          ) {
+            currentPage++;
+            searchExtensions(currentQuery, currentPage, true);
+          }
         });
+      }, observerOptions);
 
-        // Add keyboard shortcut handler
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === '/' && 
-                document.activeElement.tagName !== 'INPUT' && 
-                document.activeElement.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-                document.getElementById('searchInput').focus();
-            }
-            // Add Esc handler
-            else if (e.key === 'Escape' && document.activeElement === document.getElementById('searchInput')) {
-                document.activeElement.blur();
-            }
-        });
+      searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.trim();
 
-        function parseMarketplaceUrl(url) {
-            try {
-                const urlObj = new URL(url);
-                if (urlObj.hostname === 'marketplace.visualstudio.com' && urlObj.pathname === '/items') {
-                    const itemName = urlObj.searchParams.get('itemName');
-                    if (itemName) {
-                        const [publisher, extension] = itemName.split('.');
-                        if (publisher && extension) {
-                            return { publisher, extension };
-                        }
-                    }
-                }
-            } catch (e) {
-                return null;
-            }
-            return null;
+        // Clear previous timer
+        clearTimeout(debounceTimer);
+
+        // Reset pagination when new search starts
+        currentPage = 1;
+        hasMoreResults = true;
+        currentQuery = query;
+
+        // Hide all states initially
+        resultsContainer.classList.add("hidden");
+        loadingIndicator.classList.add("hidden");
+        emptyState.classList.add("hidden");
+        initialState.classList.add("hidden");
+
+        if (query === "") {
+          // Show initial state if query is empty
+          initialState.classList.remove("hidden");
+          return;
         }
 
-        async function searchVsix(searchString, count = 30, page = 1, append = false) {
-            if (isLoading) return;
-            isLoading = true;
-            
-            const loading = document.getElementById('loading');
-            loading.classList.remove('hidden');
-            
-            try {
-                // Check if the input is a marketplace URL
-                const urlInfo = parseMarketplaceUrl(searchString);
-                let criteria;
-                
-                if (urlInfo) {
-                    // If it's a URL, search for the specific extension
-                    criteria = [
-                        { filterType: 8, value: "Microsoft.VisualStudio.Code" },
-                        { filterType: 7, value: `${urlInfo.publisher}.${urlInfo.extension}` },
-                        { filterType: 12, value: "4096" }
-                    ];
-                } else {
-                    // Otherwise, use the regular search
-                    criteria = [
-                        { filterType: 8, value: "Microsoft.VisualStudio.Code" },
-                        { filterType: 10, value: searchString },
-                        { filterType: 12, value: "37888" }
-                    ];
-                }
+        // Show loading indicator
+        loadingIndicator.classList.remove("hidden");
 
-                const res = await fetch(
-                    `https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery`,
-                    {
-                        method: "POST",
-                        body: JSON.stringify({
-                            assetTypes: ["Microsoft.VisualStudio.Services.VSIXPackage"],
-                            filters: [{
-                                criteria,
-                                direction: 2,
-                                pageSize: count,
-                                pageNumber: page,
-                                sortBy: 0,
-                                sortOrder: 0
-                            }],
-                            flags: 914
-                        }),
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Accept": "application/json;api-version=7.1-preview.1"
-                        }
-                    }
-                );
+        // Debounce search to avoid too many API calls
+        debounceTimer = setTimeout(() => {
+          // Clear results when starting new search
+          resultsContainer.innerHTML = "";
+          searchExtensions(query, 1, false);
+        }, 300);
+      });
 
-                const data = await res.json();
-                
-                if (!data.results?.[0]?.extensions?.length) {
-                    hasMoreResults = false;
-                    if (!append) {
-                        throw new Error('No extensions found');
-                    }
-                    return [];
-                }
+      async function searchExtensions(query, page, append = false) {
+        if (isLoading) return;
 
-                const results = data.results[0].extensions.map(e => {
-                    const vsixFile = e.versions[0].files.find(f => 
-                        f.assetType === "Microsoft.VisualStudio.Services.VSIXPackage"
-                    );
-                    
-                    const version = e.versions[0];
-                    const iconUrl = `${version.fallbackAssetUri}/Microsoft.VisualStudio.Services.Icons.Default`;
-                    const vsixUrl = vsixFile ? vsixFile.source : null;
-
-                    return {
-                        publisher: e.publisher.publisherName,
-                        name: e.extensionName,
-                        displayName: e.displayName,
-                        version: version.version,
-                        vsix: vsixUrl,
-                        description: e.shortDescription,
-                        icon: iconUrl,
-                        marketplaceUrl: `https://marketplace.visualstudio.com/items?itemName=${e.publisher.publisherName}.${e.extensionName}`
-                    };
-                }).filter(e => e.vsix !== null);
-
-                hasMoreResults = results.length === count;
-                displayResults(results, append);
-                return results;
-                
-            } catch (error) {
-                console.error('Search error:', error);
-                if (!append) {
-                    const resultsDiv = document.getElementById('results');
-                    resultsDiv.innerHTML = `
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                            <p>No extensions found or invalid URL format. Please try again with a different search term or check the URL.</p>
-                        </div>
-                    `;
-                }
-                return [];
-            } finally {
-                isLoading = false;
-                loading.classList.add('hidden');
-            }
+        isLoading = true;
+        if (!append) {
+          loadingIndicator.classList.remove("hidden");
+          infiniteScrollLoader.classList.add("hidden");
+        } else {
+          infiniteScrollLoader.classList.remove("hidden");
         }
 
-        function displayResults(results, append = false) {
-            const resultsDiv = document.getElementById('results');
-            
-            if (!append) {
-                resultsDiv.innerHTML = '';
+        try {
+          const response = await fetch(
+            "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery",
+            {
+              method: "POST",
+              headers: {
+                accept: "application/json;api-version=7.1-preview.1",
+                "content-type": "application/json",
+                origin: window.location.origin,
+              },
+              body: JSON.stringify({
+                assetTypes: ["Microsoft.VisualStudio.Services.VSIXPackage"],
+                filters: [
+                  {
+                    criteria: [
+                      { filterType: 8, value: "Microsoft.VisualStudio.Code" },
+                      { filterType: 10, value: query },
+                      { filterType: 12, value: "37888" },
+                    ],
+                    direction: 2,
+                    pageSize: 10,
+                    pageNumber: page,
+                    sortBy: 0,
+                    sortOrder: 0,
+                  },
+                ],
+                flags: 914,
+              }),
             }
+          );
 
-            results.forEach(ext => {
-                const card = document.createElement('div');
-                card.className = 'flex items-center justify-between p-5 bg-[#1A1A1A] rounded-xl hover:bg-[#2A2A2A] transition-colors cursor-pointer group border border-[#2A2A2A]';
-                
-                // Create publisher initials for fallback
-                const initials = ext.publisher.substring(0, 2).toUpperCase();
-                
-                card.innerHTML = `
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-12 h-12 rounded-lg bg-[#2A2A2A] flex items-center justify-center overflow-hidden">
-                                <img src="${ext.icon}" 
-                                     alt="${ext.displayName}"
-                                     class="w-full h-full object-cover"
-                                     onerror="this.outerHTML='<div class=\'w-12 h-12 rounded-lg bg-[#2A2A2A] text-[#C1C1C1] flex items-center justify-center font-medium text-lg\'>${initials}</div>'">
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-medium text-[#C1C1C1]">${ext.displayName}</h3>
-                            <p class="text-sm text-[#808080]">${ext.publisher}</p>
-                        </div>
+          const data = await response.json();
+          displayResults(data, append);
+        } catch (error) {
+          console.error("Error searching extensions:", error);
+          if (!append) {
+            loadingIndicator.classList.add("hidden");
+            emptyState.textContent =
+              "An error occurred while searching. Please try again.";
+            emptyState.classList.remove("hidden");
+          }
+          infiniteScrollLoader.classList.add("hidden");
+        } finally {
+          isLoading = false;
+          if (!append) {
+            loadingIndicator.classList.add("hidden");
+          }
+          infiniteScrollLoader.classList.add("hidden");
+        }
+      }
+
+      function displayResults(data, append = false) {
+        // Hide loading indicators
+        loadingIndicator.classList.add("hidden");
+        infiniteScrollLoader.classList.add("hidden");
+
+        const extensions = data?.results?.[0]?.extensions || [];
+
+        // Update hasMoreResults based on received results
+        hasMoreResults = extensions.length === 10; // Assuming pageSize is 10
+
+        if (extensions.length === 0 && !append) {
+          emptyState.classList.remove("hidden");
+          return;
+        }
+
+        // Clear previous results if not appending
+        if (!append) {
+          resultsContainer.innerHTML = "";
+        }
+
+        // Remove existing sentinel
+        const existingSentinel = resultsContainer.querySelector(".sentinel");
+        if (existingSentinel) {
+          intersectionObserver.unobserve(existingSentinel);
+          existingSentinel.remove();
+        }
+
+        // Add new results
+        extensions.forEach((extension, index) => {
+          const publisher = extension.publisher.displayName;
+          const publisherName = extension.publisher.publisherName;
+          const extensionName = extension.extensionName;
+          const name = extension.displayName;
+          const description = extension.shortDescription;
+          const version = extension.versions[0]?.version || "";
+
+          // Construct the correct icon URL format
+          const iconUrl = `https://${publisherName}.gallery.vsassets.io/_apis/public/gallery/publisher/${publisherName}/extension/${extensionName}/${version}/assetbyname/Microsoft.VisualStudio.Services.Icons.Default`;
+
+          const installCount =
+            extension.statistics?.find((s) => s.statisticName === "install")
+              ?.value || 0;
+          const formattedInstalls = parseInt(installCount).toLocaleString();
+
+          const resultEl = document.createElement("div");
+          resultEl.className =
+            "px-4 py-3 hover:bg-macos-result-hover cursor-pointer flex items-start relative group transition duration-150";
+          resultEl.innerHTML = `
+                    <div class="flex-shrink-0 mr-4">
+                        <img src="${iconUrl}" 
+                             class="w-10 h-10 rounded-md shadow-sm border border-white/10" 
+                             alt="${name} icon"
+                             onerror="this.onerror=null; this.src='https://cdn.vsassets.io/v/M213_20230726.1/_content/Header/default_icon.png';">
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="text-sm text-[#808080]">Extension</span>
-                        <div class="flex items-center space-x-2">
-                            <a href="${ext.marketplaceUrl}" 
-                               class="p-2 text-[#808080] hover:text-[#C1C1C1] rounded-lg hover:bg-[#2A2A2A] transition-colors"
-                               target="_blank"
-                               title="View in Marketplace">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                </svg>
-                            </a>
-                            <a href="${ext.vsix}" 
-                               class="p-2 text-[#808080] hover:text-[#C1C1C1] rounded-lg hover:bg-[#2A2A2A] transition-colors"
-                               target="_blank"
-                               download
-                               title="Download VSIX">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                </svg>
-                            </a>
+                    <div class="flex-grow overflow-hidden">
+                        <div class="font-medium text-macos-text truncate">${name}</div>
+                        <div class="text-sm text-macos-secondary truncate">${publisher} • ${formattedInstalls} installs</div>
+                        <div class="text-xs text-macos-secondary line-clamp-1">${description}</div>
+                    </div>
+                    <div class="flex-shrink-0 ml-2">
+                        <button class="download-btn text-macos-accent hover:bg-white/10 rounded-full p-2 hidden group-hover:block transition duration-150">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                        <div class="download-dropdown absolute right-4 top-full mt-2 bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 hidden z-10 w-80">
+                            <div class="py-2 px-3 border-b border-white/10 text-sm font-medium text-macos-text">
+                                Download Assets
+                            </div>
+                            <div class="assets-container max-h-48 overflow-y-auto py-1">
+                                <div class="px-3 py-4 text-center">
+                                    <svg class="spinner w-5 h-5 text-macos-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
-                resultsDiv.appendChild(card);
+
+          resultsContainer.appendChild(resultEl);
+
+          // Add click event for the main item
+          resultEl.addEventListener("click", (e) => {
+            if (
+              !e.target.closest(".download-btn") &&
+              !e.target.closest(".download-dropdown")
+            ) {
+              const extensionId = `${publisherName}.${extensionName}`;
+              window.open(
+                `https://marketplace.visualstudio.com/items?itemName=${extensionId}`,
+                "_blank"
+              );
+            }
+          });
+
+          // Add click event for download button
+          const downloadBtn = resultEl.querySelector(".download-btn");
+          const downloadDropdown = resultEl.querySelector(".download-dropdown");
+          const assetsContainer = resultEl.querySelector(".assets-container");
+
+          downloadBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+
+            // Close any other open dropdowns
+            document
+              .querySelectorAll(".download-dropdown:not(.hidden)")
+              .forEach((dropdown) => {
+                if (dropdown !== downloadDropdown) {
+                  dropdown.classList.add("hidden");
+                }
+              });
+
+            // Toggle current dropdown
+            downloadDropdown.classList.toggle("hidden");
+
+            // If opening the dropdown, load the assets
+            if (!downloadDropdown.classList.contains("hidden")) {
+              loadExtensionAssets(extension, assetsContainer);
+            }
+          });
+
+          // Prevent dropdown clicks from bubbling up
+          downloadDropdown.addEventListener("click", (e) => {
+            e.stopPropagation();
+          });
+
+          // Add sentinel to last item if we have more results
+          if (index === extensions.length - 1 && hasMoreResults) {
+            const sentinel = document.createElement("div");
+            sentinel.className = "sentinel h-4";
+            resultsContainer.appendChild(sentinel);
+            intersectionObserver.observe(sentinel);
+          }
+        });
+
+        // Show results container
+        resultsContainer.classList.remove("hidden");
+      }
+
+      // Function to load extension assets
+      function loadExtensionAssets(extension, container) {
+        // Clear container and show loading
+        container.innerHTML =
+          '<div class="px-3 py-2 text-xs text-macos-secondary">Loading assets...</div>';
+
+        if (!extension.versions || extension.versions.length === 0) {
+          container.innerHTML =
+            '<div class="px-3 py-2 text-xs text-macos-secondary">No assets available</div>';
+          return;
+        }
+
+        // Group assets by platform
+        const platformPackages = {};
+        const universalLinks = [];
+
+        // Process all versions to extract platform-specific packages and universal links
+        extension.versions.forEach((version) => {
+          const platform = version.targetPlatform || "Universal";
+
+          // Get downloadable VSIX packages
+          if (version.files) {
+            version.files.forEach((file) => {
+              if (
+                file.assetType &&
+                file.assetType.includes(
+                  "Microsoft.VisualStudio.Services.VSIXPackage"
+                )
+              ) {
+                if (!platformPackages[platform]) {
+                  platformPackages[platform] = [];
+                }
+
+                platformPackages[platform].push({
+                  name: `${extension.displayName} v${version.version}`,
+                  url: file.source,
+                  type: "package",
+                  platform: platform,
+                  version: version.version,
+                });
+              }
             });
-        }
+          }
 
-        // Infinite scroll handler
-        function handleScroll() {
-            if (!hasMoreResults || isLoading) return;
+          // Extract links (only from the first version to avoid duplicates)
+          if (
+            platform === "Universal" ||
+            !Object.keys(platformPackages).includes("Universal")
+          ) {
+            if (version.properties) {
+              const propertyMap = {
+                "Microsoft.VisualStudio.Services.Content.Details":
+                  "Documentation",
+                "Microsoft.VisualStudio.Services.Content.License": "License",
+                "Microsoft.VisualStudio.Services.Content.Changelog":
+                  "Changelog",
+                "Microsoft.VisualStudio.Services.Links.Source":
+                  "Source Repository",
+                "Microsoft.VisualStudio.Services.Links.GitHub":
+                  "GitHub Repository",
+                "Microsoft.VisualStudio.Services.Links.Support": "Support",
+                "Microsoft.VisualStudio.Services.Links.Learn": "Learn More",
+                "Microsoft.VisualStudio.Services.Links.Getstarted":
+                  "Get Started",
+              };
 
-            const scrollPosition = window.innerHeight + window.scrollY;
-            const scrollThreshold = document.documentElement.scrollHeight - 800; // Load more when within 800px of bottom
-
-            if (scrollPosition > scrollThreshold) {
-                currentPage++;
-                searchVsix(currentQuery, 30, currentPage, true);
-            }
-        }
-
-        // Add scroll event listener
-        window.addEventListener('scroll', handleScroll);
-
-        // Add input event listener for auto-search
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const searchQuery = e.target.value.trim();
-            
-            // Clear the previous timeout
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-            
-            // Set a new timeout to search after 300ms of no typing
-            searchTimeout = setTimeout(() => {
-                if (searchQuery) {
-                    currentQuery = searchQuery;
-                    currentPage = 1;
-                    hasMoreResults = true;
-                    searchVsix(searchQuery, 30, 1).then(results => displayResults(results));
+              version.properties.forEach((property) => {
+                if (
+                  property.key &&
+                  propertyMap[property.key] &&
+                  property.value
+                ) {
+                  // Check if this link is already in the array to avoid duplicates
+                  if (
+                    !universalLinks.some(
+                      (link) => link.name === propertyMap[property.key]
+                    )
+                  ) {
+                    universalLinks.push({
+                      name: propertyMap[property.key],
+                      url: property.value,
+                      type: "link",
+                    });
+                  }
                 }
-            }, 300);
+              });
+            }
+          }
         });
 
-        // Keep the Enter key handler for immediate search
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                if (searchTimeout) {
-                    clearTimeout(searchTimeout);
-                }
-                const searchQuery = e.target.value.trim();
-                if (searchQuery) {
-                    currentQuery = searchQuery;
-                    currentPage = 1;
-                    hasMoreResults = true;
-                    searchVsix(searchQuery, 30, 1).then(results => displayResults(results));
-                }
+        // Display assets
+        const hasAnyAssets =
+          Object.keys(platformPackages).length > 0 || universalLinks.length > 0;
+
+        if (!hasAnyAssets) {
+          container.innerHTML =
+            '<div class="px-3 py-2 text-xs text-macos-secondary">No assets available</div>';
+          return;
+        }
+
+        container.innerHTML = "";
+
+        // Platform display names
+        const platformNames = {
+          Universal: "Universal",
+          "win32-x64": "Windows (x64)",
+          "win32-ia32": "Windows (x86)",
+          "win32-arm64": "Windows (ARM64)",
+          "darwin-x64": "macOS (Intel)",
+          "darwin-arm64": "macOS (Apple Silicon)",
+          "linux-x64": "Linux (x64)",
+          "linux-arm64": "Linux (ARM64)",
+          "linux-armhf": "Linux (ARM)",
+          web: "Web",
+        };
+
+        // Function to add a section header
+        const addSectionHeader = (title) => {
+          const header = document.createElement("div");
+          header.className =
+            "px-3 py-1 text-xs text-macos-secondary font-medium bg-black/20 mt-1";
+          header.textContent = title;
+          container.appendChild(header);
+        };
+
+        // Add platform-specific downloads
+        const platforms = Object.keys(platformPackages);
+        if (platforms.length > 0) {
+          addSectionHeader("Platform-Specific Downloads");
+
+          // Sort platforms to put Universal first, then current platform, then others
+          const currentPlatform = detectUserPlatform();
+          platforms.sort((a, b) => {
+            if (a === "Universal") return -1;
+            if (b === "Universal") return 1;
+            if (a === currentPlatform) return -1;
+            if (b === currentPlatform) return 1;
+            return a.localeCompare(b);
+          });
+
+          platforms.forEach((platform) => {
+            const packages = platformPackages[platform];
+
+            const platformItem = document.createElement("div");
+            platformItem.className = "px-3 py-2 cursor-pointer";
+
+            const displayName = platformNames[platform] || platform;
+            let className =
+              "text-sm text-macos-text flex items-center justify-between group hover:bg-macos-result-hover";
+
+            // Highlight current platform
+            if (platform === currentPlatform) {
+              className += " font-medium";
             }
+
+            platformItem.innerHTML = `
+                        <div class="${className}">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span class="truncate">${displayName}</span>
+                            </div>
+                            ${
+                              platform === currentPlatform
+                                ? '<span class="text-xs text-macos-accent">Current Platform</span>'
+                                : ""
+                            }
+                        </div>
+                    `;
+
+            // If there are multiple versions, create an expandable dropdown
+            if (packages.length > 1) {
+              platformItem.classList.add("platform-expandable");
+              const chevron = document.createElement("div");
+              chevron.className = "platform-chevron text-macos-secondary ml-2";
+              chevron.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        `;
+              platformItem
+                .querySelector(".flex.items-center")
+                .appendChild(chevron);
+
+              // Versions container
+              const versionsContainer = document.createElement("div");
+              versionsContainer.className = "platform-versions ml-6 hidden";
+
+              // Add all versions
+              packages.forEach((pkg) => {
+                const versionItem = document.createElement("div");
+                versionItem.className =
+                  "py-1 text-sm text-macos-secondary hover:text-macos-text flex items-center cursor-pointer";
+                versionItem.innerHTML = `
+                                <span class="truncate">Version ${pkg.version}</span>
+                            `;
+                versionItem.addEventListener("click", (e) => {
+                  e.stopPropagation();
+                  window.open(pkg.url, "_blank");
+                });
+                versionsContainer.appendChild(versionItem);
+              });
+
+              // Toggle versions on click
+              platformItem.addEventListener("click", () => {
+                const isHidden = versionsContainer.classList.contains("hidden");
+                versionsContainer.classList.toggle("hidden", !isHidden);
+                platformItem.querySelector(
+                  ".platform-chevron svg"
+                ).style.transform = isHidden ? "rotate(180deg)" : "";
+              });
+
+              container.appendChild(platformItem);
+              container.appendChild(versionsContainer);
+            } else if (packages.length === 1) {
+              // For single version, just make the platform item clickable
+              platformItem.addEventListener("click", () => {
+                window.open(packages[0].url, "_blank");
+              });
+              container.appendChild(platformItem);
+            }
+          });
+        }
+
+        // Add universal links
+        if (universalLinks.length > 0) {
+          addSectionHeader("Resources");
+
+          universalLinks.forEach((asset) => {
+            const linkItem = document.createElement("div");
+            linkItem.className =
+              "px-3 py-2 text-sm text-macos-text hover:bg-macos-result-hover cursor-pointer flex items-center";
+            linkItem.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        <span class="truncate">${asset.name}</span>
+                    `;
+
+            linkItem.addEventListener("click", () => {
+              window.open(asset.url, "_blank");
+            });
+
+            container.appendChild(linkItem);
+          });
+        }
+      }
+
+      // Helper function to detect the user's platform
+      function detectUserPlatform() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const platform = navigator.platform.toLowerCase();
+
+        // Detect OS
+        let os;
+        if (userAgent.indexOf("win") !== -1) os = "win32";
+        else if (userAgent.indexOf("mac") !== -1) os = "darwin";
+        else if (userAgent.indexOf("linux") !== -1) os = "linux";
+        else return "Universal"; // Default
+
+        // Detect architecture
+        let arch;
+        if (
+          userAgent.indexOf("arm64") !== -1 ||
+          userAgent.indexOf("aarch64") !== -1
+        ) {
+          arch = "arm64";
+        } else if (
+          userAgent.indexOf("armhf") !== -1 ||
+          userAgent.indexOf("arm") !== -1
+        ) {
+          arch = os === "win32" ? "arm64" : "armhf"; // Windows ARM is typically ARM64
+        } else if (
+          userAgent.indexOf("x86_64") !== -1 ||
+          userAgent.indexOf("x64") !== -1 ||
+          userAgent.indexOf("wow64") !== -1 ||
+          (os === "darwin" && !userAgent.includes("arm"))
+        ) {
+          arch = "x64";
+        } else {
+          arch = "ia32"; // Default to 32-bit
+        }
+
+        // Special case for Mac with Apple Silicon running x64 browser
+        if (
+          os === "darwin" &&
+          !userAgent.includes("arm") &&
+          platform.includes("mac") &&
+          "ontouchend" in document
+        ) {
+          // Likely an Apple Silicon Mac running x64 browser
+          return `${os}-arm64`;
+        }
+
+        return `${os}-${arch}`;
+      }
+
+      // Add global click handler to close all dropdowns when clicking outside
+      document.addEventListener("click", () => {
+        document.querySelectorAll(".download-dropdown").forEach((dropdown) => {
+          dropdown.classList.add("hidden");
         });
+      });
+
+      // Improve existing keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          // Close all dropdowns first
+          const openDropdowns = document.querySelectorAll(
+            ".download-dropdown:not(.hidden)"
+          );
+          if (openDropdowns.length > 0) {
+            openDropdowns.forEach((dropdown) =>
+              dropdown.classList.add("hidden")
+            );
+            return;
+          }
+
+          // If no dropdowns are open, reset search
+          searchInput.value = "";
+          resultsContainer.classList.add("hidden");
+          loadingIndicator.classList.add("hidden");
+          emptyState.classList.add("hidden");
+          initialState.classList.remove("hidden");
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
