@@ -42,6 +42,30 @@
         animation: fadeIn 0.3s ease-out;
       }
 
+      /* macOS-style keyboard hint styling */
+      .keyboard-hint {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 18px;
+        padding: 0 4px;
+        font-size: 11px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.65);
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+        text-transform: capitalize;
+      }
+
+      .keyboard-hints-container {
+        display: flex;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 12px;
+      }
+
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -147,6 +171,16 @@
             autocomplete="off"
             autofocus
           />
+          <div class="keyboard-hints-container ml-2 flex-shrink-0">
+            <div class="flex items-center">
+              <span class="mr-1">search</span>
+              <div class="keyboard-hint">↵</div>
+            </div>
+            <div class="flex items-center">
+              <span class="mr-1">clear</span>
+              <div class="keyboard-hint">Esc</div>
+            </div>
+          </div>
         </div>
 
         <!-- Results container -->
@@ -893,6 +927,25 @@
           loadingIndicator.classList.add("hidden");
           emptyState.classList.add("hidden");
           initialState.classList.remove("hidden");
+        } else if (e.key === "Enter" && document.activeElement === searchInput) {
+          // Trigger search on Enter key if there's text in the search box
+          const query = searchInput.value.trim();
+          if (query && !isLoading) {
+            // Reset pagination and start new search
+            currentPage = 1;
+            hasMoreResults = true;
+            currentQuery = query;
+            
+            // Show loading indicator and hide other states
+            resultsContainer.innerHTML = "";
+            resultsContainer.classList.add("hidden");
+            loadingIndicator.classList.remove("hidden");
+            emptyState.classList.add("hidden");
+            initialState.classList.add("hidden");
+            
+            // Start search
+            searchExtensions(query, 1, false);
+          }
         }
       });
     </script>
