@@ -3,12 +3,68 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="Download VSIX files directly from Visual Studio Code Marketplace. Fast, free, and easy-to-use tool for VS Code extension downloading without requiring the VS Code editor."
+    />
+    <meta
+      name="keywords"
+      content="VSIX downloader, VS Code extensions, Visual Studio Code, download extensions, VSIX files, VS Code marketplace, offline installation"
+    />
+    <meta name="author" content="CypherpunkSamurai" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta
+      property="og:title"
+      content="VSIX Downloader - Download Visual Studio Code Extensions Easily"
+    />
+    <meta
+      property="og:description"
+      content="Free tool to download VSIX files directly from the VS Code Marketplace. Get your favorite VS Code extensions for offline installation."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://cypherpunksamurai.github.io/vsix-downloader-webui/"
+    />
+    <meta
+      property="og:image"
+      content="https://cypherpunksamurai.github.io/vsix-downloader-webui/web-app-manifest-512x512.png"
+    />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="VSIX Downloader - Download Visual Studio Code Extensions Easily"
+    />
+    <meta
+      name="twitter:description"
+      content="Free tool to download VSIX files directly from the VS Code Marketplace. Get your favorite VS Code extensions for offline installation."
+    />
+    <meta
+      name="twitter:image"
+      content="https://cypherpunksamurai.github.io/vsix-downloader-webui/web-app-manifest-512x512.png"
+    />
+
+    <!-- Canonical URL -->
+    <link
+      rel="canonical"
+      href="https://cypherpunksamurai.github.io/vsix-downloader-webui/"
+    />
+
     <link rel="icon" type="image/png" href="favicon-96x96.png?" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg?" />
     <link rel="shortcut icon" href="favicon.ico?" />
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?" />
     <link rel="manifest" href="site.webmanifest?" />
-    <title>Visual Studio Code Extension Marketplace VSIX Downloader</title>
+    <title>
+      VSIX Downloader - Download Visual Studio Code Extensions | Free Online
+      Tool
+    </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -102,38 +158,68 @@
         }
 
         50% {
-          opacity: 1;
+          opacity: 0.8;
         }
-      }
-
-      /* Scrollbar styling */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.1);
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .spinner {
-        animation: spin 1s linear infinite;
       }
     </style>
+
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "VSIX Downloader for VS Code Extensions",
+        "headline": "Download VS Code Extensions as VSIX Files",
+        "description": "Download any Visual Studio Code extension as VSIX file. Easily save extensions from the VS Code Marketplace for offline installation, air-gapped environments, or version control. Fast, free, and easy to use with no installation required.",
+        "operatingSystem": "All",
+        "applicationCategory": "DeveloperApplication",
+        "keywords": "vsix downloader, vs code extension download, visual studio code marketplace, vsix file, vscode extensions offline",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "url": "https://cypherpunksamurai.github.io/vsix-downloader-webui/",
+        "author": {
+          "@type": "Organization",
+          "name": "CypherpunkSamurai"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://cypherpunksamurai.github.io/vsix-downloader-webui/?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "VSIX Downloader for Visual Studio Code Extensions",
+        "url": "https://cypherpunksamurai.github.io/vsix-downloader-webui/",
+        "description": "A free online tool to download VSIX files directly from the Visual Studio Code Marketplace for offline installation.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "CypherpunkSamurai",
+          "url": "https://github.com/CypherpunkSamurai"
+        },
+        "softwareHelp": {
+          "@type": "CreativeWork",
+          "url": "https://github.com/CypherpunkSamurai/vsix-downloader-webui/blob/main/README.md"
+        },
+        "keywords": "vsix downloader, vs code extension download, visual studio code marketplace, vsix file, vscode extensions, download vsix, offline vscode extensions, vscode extension download, vscode marketplace download, install vsix offline"
+      }
+    </script>
   </head>
 
   <body class="h-screen flex items-center justify-center bg-black">
