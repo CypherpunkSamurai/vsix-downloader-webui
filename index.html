@@ -110,8 +110,9 @@
   <body class="h-screen flex items-center justify-center bg-black">
     <!-- Replace existing background with a darker one -->
     <div class="fixed inset-0 z-0">
+      <!-- src="https://wallpapercave.com/download/visual-studio-wallpapers-wp6734435" -->
       <img
-        src="https://wallpapercave.com/download/visual-studio-wallpapers-wp6734435"
+        src="https://wallpapercave.com/wp/wp6734435.png"
         class="h-full w-full object-cover"
         alt="macOS background"
       />
@@ -142,7 +143,7 @@
             type="text"
             id="search-input"
             class="w-full bg-transparent outline-none text-macos-text placeholder-gray-500 text-lg"
-            placeholder="Search VS Code Extensions..."
+            placeholder="Search by name or paste marketplace URL..."
             autocomplete="off"
             autofocus
           />
@@ -151,7 +152,7 @@
         <!-- Results container -->
         <div
           id="results-container"
-          class="max-h-[60vh] overflow-y-auto py-2 hidden"
+          class="max-h-[60vh] overflow-y-auto py-2 hidden overflow-visible"
         >
           <!-- Results will be inserted here by JS -->
         </div>
@@ -290,7 +291,23 @@
       }, observerOptions);
 
       searchInput.addEventListener("input", (e) => {
-        const query = e.target.value.trim();
+        let query = e.target.value.trim();
+
+        // Check if the query is a marketplace URL
+        if (query.includes("marketplace.visualstudio.com/items")) {
+          try {
+            const url = new URL(query);
+            const extensionId = url.searchParams.get("itemName");
+            if (extensionId) {
+              query = extensionId;
+              // Show a toast or some indication that URL was converted
+              showToast(`Searching for extension: ${extensionId}`);
+            }
+          } catch (error) {
+            // Not a valid URL, proceed with the query as is
+            console.log("Not a valid URL, using as search term");
+          }
+        }
 
         // Clear previous timer
         clearTimeout(debounceTimer);
@@ -450,7 +467,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                         </button>
-                        <div class="download-dropdown absolute right-4 top-full mt-2 bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 hidden z-10 w-80">
+                        <div class="download-dropdown absolute right-4 top-full mt-2 bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 hidden z-20 w-80 overflow-y-auto max-h-96">
                             <div class="py-2 px-3 border-b border-white/10 text-sm font-medium text-macos-text">
                                 Download Assets
                             </div>
