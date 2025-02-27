@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" type="image/png" href="favicon-96x96.png?" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?" />
+    <link rel="shortcut icon" href="favicon.ico?" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?" />
+    <link rel="manifest" href="site.webmanifest?" />
     <title>Visual Studio Code Extension Marketplace VSIX Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -517,9 +517,7 @@
 
           // Add click event for the main item
           resultEl.addEventListener("click", (e) => {
-            if (
-              !e.target.closest(".download-btn")
-            ) {
+            if (!e.target.closest(".download-btn")) {
               const extensionId = `${publisherName}.${extensionName}`;
               window.open(
                 `https://marketplace.visualstudio.com/items?itemName=${extensionId}`,
@@ -530,23 +528,24 @@
 
           // Add click event for download button
           const downloadBtn = resultEl.querySelector(".download-btn");
-          
+
           downloadBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            
+
             // Get extension ID from data attribute
             const extensionId = downloadBtn.getAttribute("data-extension-id");
-            
+
             // Close any other open dropdowns
             const existingDropdown = document.getElementById("global-dropdown");
             if (existingDropdown) {
               document.body.removeChild(existingDropdown);
             }
-            
+
             // Create dropdown element
             const downloadDropdown = document.createElement("div");
             downloadDropdown.id = "global-dropdown";
-            downloadDropdown.className = "fixed bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 z-50 w-80 overflow-y-auto max-h-96";
+            downloadDropdown.className =
+              "fixed bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 z-50 w-80 overflow-y-auto max-h-96";
             downloadDropdown.innerHTML = `
               <div class="py-2 px-3 border-b border-white/10 text-sm font-medium text-macos-text">
                   Download Assets
@@ -560,41 +559,42 @@
                   </div>
               </div>
             `;
-            
+
             // Position the dropdown relative to the button
             const buttonRect = downloadBtn.getBoundingClientRect();
-            
+
             // Calculate position to align dropdown with the button
             // We'll align it so it appears right under the button but not extending too far right
-            const buttonCenterX = buttonRect.left + (buttonRect.width / 2);
-            
-            // Set dropdown width 
+            const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+
+            // Set dropdown width
             const dropdownWidth = 320; // Width from the class w-80
-            
+
             // Calculate left position to center dropdown with button if possible,
             // but ensure it stays within viewport bounds
-            let leftPos = buttonCenterX - (dropdownWidth / 2);
-            
+            let leftPos = buttonCenterX - dropdownWidth / 2;
+
             // Ensure dropdown doesn't go off-screen to the left
             leftPos = Math.max(10, leftPos);
-            
+
             // Ensure dropdown doesn't go off-screen to the right
             const rightEdge = leftPos + dropdownWidth;
             if (rightEdge > window.innerWidth - 10) {
               leftPos = window.innerWidth - dropdownWidth - 10;
             }
-            
+
             // Position the dropdown
-            downloadDropdown.style.top = (buttonRect.bottom + 8) + 'px';
-            downloadDropdown.style.left = leftPos + 'px';
-            
+            downloadDropdown.style.top = buttonRect.bottom + 8 + "px";
+            downloadDropdown.style.left = leftPos + "px";
+
             // Add to body
             document.body.appendChild(downloadDropdown);
-            
+
             // Load assets for this extension
-            const assetsContainer = downloadDropdown.querySelector(".assets-container");
+            const assetsContainer =
+              downloadDropdown.querySelector(".assets-container");
             loadExtensionAssets(extension, assetsContainer);
-            
+
             // Prevent dropdown clicks from bubbling up
             downloadDropdown.addEventListener("click", (e) => {
               e.stopPropagation();
@@ -915,7 +915,11 @@
       // Add global click handler to close all dropdowns when clicking outside
       document.addEventListener("click", (e) => {
         const globalDropdown = document.getElementById("global-dropdown");
-        if (globalDropdown && !e.target.closest("#global-dropdown") && !e.target.closest(".download-btn")) {
+        if (
+          globalDropdown &&
+          !e.target.closest("#global-dropdown") &&
+          !e.target.closest(".download-btn")
+        ) {
           document.body.removeChild(globalDropdown);
         }
       });
@@ -936,7 +940,10 @@
           loadingIndicator.classList.add("hidden");
           emptyState.classList.add("hidden");
           initialState.classList.remove("hidden");
-        } else if (e.key === "Enter" && document.activeElement === searchInput) {
+        } else if (
+          e.key === "Enter" &&
+          document.activeElement === searchInput
+        ) {
           // Trigger search on Enter key if there's text in the search box
           const query = searchInput.value.trim();
           if (query && !isLoading) {
@@ -944,14 +951,14 @@
             currentPage = 1;
             hasMoreResults = true;
             currentQuery = query;
-            
+
             // Show loading indicator and hide other states
             resultsContainer.innerHTML = "";
             resultsContainer.classList.add("hidden");
             loadingIndicator.classList.remove("hidden");
             emptyState.classList.add("hidden");
             initialState.classList.add("hidden");
-            
+
             // Start search
             searchExtensions(query, 1, false);
           }
