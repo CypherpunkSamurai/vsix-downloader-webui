@@ -145,23 +145,22 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 20px;
-        height: 18px;
-        padding: 0 4px;
+        min-width: 22px;
+        height: 20px;
+        padding: 0 5px;
         font-size: 11px;
         font-weight: 500;
-        color: rgba(255, 255, 255, 0.65);
-        background-color: rgba(255, 255, 255, 0.15);
-        border-radius: 3px;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
-        text-transform: capitalize;
+        color: rgba(255, 255, 255, 0.75);
+        background-color: rgba(255, 255, 255, 0.13);
+        border-radius: 4px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+        text-transform: lowercase;
       }
 
       .keyboard-hints-container {
-        display: flex;
-        gap: 8px;
         color: rgba(255, 255, 255, 0.5);
         font-size: 12px;
+        font-weight: 400;
       }
 
       @keyframes fadeIn {
@@ -353,20 +352,6 @@
             autocomplete="off"
             autofocus
           />
-          <div class="keyboard-hints-container ml-2 flex-shrink-0">
-            <div class="flex items-center">
-              <span class="mr-1">search</span>
-              <div class="keyboard-hint">↵</div>
-            </div>
-            <div class="flex items-center">
-              <span class="mr-1">clear</span>
-              <div class="keyboard-hint">Esc</div>
-            </div>
-            <div class="flex items-center">
-              <span class="mr-1">focus</span>
-              <div class="keyboard-hint">/</div>
-            </div>
-          </div>
         </div>
 
         <!-- Results container -->
@@ -470,6 +455,24 @@
             />
           </svg>
           <p>Start typing to search VS Code extensions</p>
+        </div>
+
+        <!-- Keyboard hints footer -->
+        <div class="keyboard-hints-container border-t border-white/10 p-3 flex justify-center">
+          <div class="flex items-center mx-2">
+            <span class="mr-1.5 text-white/50">search</span>
+            <div class="keyboard-hint">↵</div>
+          </div>
+          <div class="mx-2 text-white/30">•</div>
+          <div class="flex items-center mx-2">
+            <span class="mr-1.5 text-white/50">clear</span>
+            <div class="keyboard-hint">esc</div>
+          </div>
+          <div class="mx-2 text-white/30">•</div>
+          <div class="flex items-center mx-2">
+            <span class="mr-1.5 text-white/50">focus</span>
+            <div class="keyboard-hint">/</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1108,6 +1111,8 @@
       // Improve existing keyboard navigation
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
+          e.preventDefault();
+          searchInput.blur();
           // Close dropdown first if it's open
           const globalDropdown = document.getElementById("global-dropdown");
           if (globalDropdown) {
@@ -1115,7 +1120,7 @@
             return;
           }
 
-          // If no dropdown is open, reset search
+          // If no dropdown is open, reset search but don't remove focus
           searchInput.value = "";
           resultsContainer.classList.add("hidden");
           loadingIndicator.classList.add("hidden");
