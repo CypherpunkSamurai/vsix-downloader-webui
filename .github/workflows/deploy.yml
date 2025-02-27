@@ -1,0 +1,26 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: . # The folder containing your index.html
+          branch: gh-pages # The branch to deploy to
+          clean: true # Automatically remove deleted files from the deployment branch
+          single-commit: true # Keep only the latest commit on the deployment branch
+          token: ${{ secrets.GITHUB_TOKEN }} # GitHub automatically provides this secret

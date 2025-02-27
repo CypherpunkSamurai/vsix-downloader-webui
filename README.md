@@ -16,5 +16,17 @@ A Simple WebUI Created with Tailwind for Fetching VSCode Extensions VSIX files f
 
 4. Click the download button! 👇
 
+## Development
+
+### GitHub Pages Deployment
+
+This project includes a GitHub Actions workflow that automatically deploys the website to GitHub Pages whenever changes are pushed to the main branch. The workflow:
+
+1. Checks out the repository code
+2. Copies the files to the gh-pages branch
+3. Deploys the content to GitHub Pages
+
+To manually trigger a deployment, you can run the workflow from the "Actions" tab in your GitHub repository.
+
 ## Credits
 - These Two StackOverflow Questions [\[1\]](https://stackoverflow.com/questions/37071388/how-can-i-install-visual-studio-code-extensions-offline/68078721#68078721) [\[2\]](https://stackoverflow.com/questions/79359919/how-can-i-manually-download-vsix-files-now-that-the-vs-code-marketplace-no-long)
