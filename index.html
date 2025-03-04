@@ -953,52 +953,45 @@
               className += " font-medium";
             }
 
-            platformItem.innerHTML = `
-                        <div class="${className}">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                                <span class="truncate">${displayName}</span>
-                            </div>
-                            ${
-                              platform === currentPlatform
-                                ? '<span class="text-xs text-macos-accent">Current Platform</span>'
-                                : ""
-                            }
-                        </div>
-                    `;
-
             // If there are multiple versions, create an expandable dropdown
             if (packages.length > 1) {
-              platformItem.classList.add("platform-expandable");
-              const chevron = document.createElement("div");
-              chevron.className = "platform-chevron text-macos-secondary ml-2";
-              chevron.innerHTML = `
+              platformItem.classList.add("platform-expandable", "cursor-pointer");
+              platformItem.innerHTML = `
+                <div class="${className}">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span class="truncate">${displayName}</span>
+                        <div class="platform-chevron text-macos-secondary ml-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
-                        `;
-              platformItem
-                .querySelector(".flex.items-center")
-                .appendChild(chevron);
+                        </div>
+                    </div>
+                    ${
+                      platform === currentPlatform
+                        ? '<span class="text-xs text-macos-accent">Current Platform</span>'
+                        : ""
+                    }
+                </div>
+              `;
 
               // Versions container
               const versionsContainer = document.createElement("div");
               versionsContainer.className = "platform-versions ml-6 hidden";
 
-              // Add all versions
+              // Add all versions with anchor tags
               packages.forEach((pkg) => {
                 const versionItem = document.createElement("div");
                 versionItem.className =
                   "py-1 text-sm text-macos-secondary hover:text-macos-text flex items-center cursor-pointer";
                 versionItem.innerHTML = `
-                                <span class="truncate">Version ${pkg.version}</span>
-                            `;
-                versionItem.addEventListener("click", (e) => {
-                  e.stopPropagation();
-                  window.open(pkg.url, "_blank");
-                });
+                  <a href="${pkg.url}" target="_blank" rel="noopener" 
+                     class="text-sm text-macos-secondary hover:text-macos-text flex items-center">
+                    <span class="truncate">Version ${pkg.version}</span>
+                  </a>
+                `;
                 versionsContainer.appendChild(versionItem);
               });
 
@@ -1014,16 +1007,28 @@
               container.appendChild(platformItem);
               container.appendChild(versionsContainer);
             } else if (packages.length === 1) {
-              // For single version, just make the platform item clickable
-              platformItem.addEventListener("click", () => {
-                window.open(packages[0].url, "_blank");
-              });
+              // For single version, use an anchor tag
+              platformItem.innerHTML = `
+                <a href="${packages[0].url}" target="_blank" rel="noopener" class="${className}">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span class="truncate">${displayName}</span>
+                    </div>
+                    ${
+                      platform === currentPlatform
+                        ? '<span class="text-xs text-macos-accent">Current Platform</span>'
+                        : ""
+                    }
+                </a>
+              `;
               container.appendChild(platformItem);
             }
           });
         }
 
-        // Add universal links
+        // Add universal links using anchor tags
         if (universalLinks.length > 0) {
           addSectionHeader("Resources");
 
@@ -1032,16 +1037,14 @@
             linkItem.className =
               "px-3 py-2 text-sm text-macos-text hover:bg-macos-result-hover cursor-pointer flex items-center";
             linkItem.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        <span class="truncate">${asset.name}</span>
-                    `;
-
-            linkItem.addEventListener("click", () => {
-              window.open(asset.url, "_blank");
-            });
-
+              <a href="${asset.url}" target="_blank" rel="noopener" 
+                 class="text-sm text-macos-text hover:bg-macos-result-hover flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <span class="truncate">${asset.name}</span>
+              </a>
+            `;
             container.appendChild(linkItem);
           });
         }
