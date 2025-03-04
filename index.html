@@ -988,7 +988,8 @@
                   "py-1 text-sm text-macos-secondary hover:text-macos-text flex items-center cursor-pointer";
                 versionItem.innerHTML = `
                   <a href="${pkg.url}" target="_blank" rel="noopener" 
-                     class="text-sm text-macos-secondary hover:text-macos-text flex items-center">
+                     class="text-sm text-macos-secondary hover:text-macos-text flex items-center"
+                     download="${extension.displayName}-${extension.publisher.publisherName}-${pkg.platform}-${pkg.version}.vsix">
                     <span class="truncate">Version ${pkg.version}</span>
                   </a>
                 `;
@@ -1009,7 +1010,8 @@
             } else if (packages.length === 1) {
               // For single version, use an anchor tag
               platformItem.innerHTML = `
-                <a href="${packages[0].url}" target="_blank" rel="noopener" class="${className}">
+                <a href="${packages[0].url}" target="_blank" rel="noopener" class="${className}"
+                   download="${extension.displayName}-${extension.publisher.publisherName}-${platform}-${packages[0].version}.vsix">
                     <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
