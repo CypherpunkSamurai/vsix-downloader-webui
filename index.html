@@ -987,13 +987,21 @@
                 versionItem.className =
                   "py-1 text-sm text-macos-secondary hover:text-macos-text flex items-center cursor-pointer";
                 versionItem.innerHTML = `
-                  <a href="${pkg.url}" target="_blank" rel="noopener" 
-                     class="text-sm text-macos-secondary hover:text-macos-text flex items-center"
-                     download="${extension.displayName}-${extension.publisher.publisherName}-${pkg.platform}-${pkg.version}.vsix">
+                  <div class="text-sm text-macos-secondary hover:text-macos-text flex items-center download-link" 
+                       data-url="${pkg.url}" 
+                       data-filename="${extension.displayName.replace(/[^a-zA-Z0-9-_\.]/g, '_')}_${extension.publisher.publisherName}.${extension.extensionName}_${pkg.version}_${platform}.vsix">
                     <span class="truncate">Version ${pkg.version}</span>
-                  </a>
+                  </div>
                 `;
                 versionsContainer.appendChild(versionItem);
+                
+                // Add click event for download
+                versionItem.querySelector('.download-link').addEventListener('click', function(e) {
+                  e.preventDefault();
+                  const url = this.getAttribute('data-url');
+                  const filename = this.getAttribute('data-filename');
+                  downloadFile(url, filename);
+                });
               });
 
               // Toggle versions on click
@@ -1008,10 +1016,11 @@
               container.appendChild(platformItem);
               container.appendChild(versionsContainer);
             } else if (packages.length === 1) {
-              // For single version, use an anchor tag
+              // For single version, use a div with click handler
               platformItem.innerHTML = `
-                <a href="${packages[0].url}" target="_blank" rel="noopener" class="${className}"
-                   download="${extension.displayName}-${extension.publisher.publisherName}-${platform}-${packages[0].version}.vsix">
+                <div class="${className} download-link" 
+                     data-url="${packages[0].url}" 
+                     data-filename="${extension.displayName.replace(/[^a-zA-Z0-9-_\.]/g, '_')}_${extension.publisher.publisherName}.${extension.extensionName}_${packages[0].version}_${platform}.vsix">
                     <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -1023,9 +1032,17 @@
                         ? '<span class="text-xs text-macos-accent">Current Platform</span>'
                         : ""
                     }
-                </a>
+                </div>
               `;
               container.appendChild(platformItem);
+              
+              // Add click event for download
+              platformItem.querySelector('.download-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('data-url');
+                const filename = this.getAttribute('data-filename');
+                downloadFile(url, filename);
+              });
             }
           });
         }
@@ -1050,6 +1067,82 @@
             container.appendChild(linkItem);
           });
         }
+      }
+
+      // Function to download file with custom filename
+      function downloadFile(url, filename) {
+        // Show loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'download-loading';
+        loadingIndicator.className = 'fixed top-4 right-4 bg-macos-bg macos-blur rounded-lg shadow-2xl border border-white/10 z-50 p-4 text-macos-text';
+        loadingIndicator.innerHTML = `
+          <div class="flex items-center">
+            <svg class="animate-spin-slow w-5 h-5 mr-2 text-macos-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Downloading ${filename}...</span>
+          </div>
+        `;
+        document.body.appendChild(loadingIndicator);
+
+        // Fetch the file as blob
+        fetch(url)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.blob();
+          })
+          .then(blob => {
+            // Remove loading indicator
+            document.body.removeChild(loadingIndicator);
+            
+            // Create a temporary anchor element
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            
+            // Create object URL for the blob
+            const url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = filename;
+            
+            // Trigger download
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          })
+          .catch(error => {
+            // Remove loading indicator
+            if (document.getElementById('download-loading')) {
+              document.body.removeChild(loadingIndicator);
+            }
+            
+            // Show error message
+            const errorIndicator = document.createElement('div');
+            errorIndicator.className = 'fixed top-4 right-4 bg-red-500/80 macos-blur rounded-lg shadow-2xl border border-red-400/30 z-50 p-4 text-white';
+            errorIndicator.innerHTML = `
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Download failed. Please try again.</span>
+              </div>
+            `;
+            document.body.appendChild(errorIndicator);
+            
+            // Remove error message after 5 seconds
+            setTimeout(() => {
+              if (errorIndicator.parentNode) {
+                errorIndicator.parentNode.removeChild(errorIndicator);
+              }
+            }, 5000);
+            
+            console.error('Download failed:', error);
+          });
       }
 
       // Helper function to detect the user's platform
